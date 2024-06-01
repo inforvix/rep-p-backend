@@ -1,0 +1,51 @@
+postgres
+alter system set timezone="GMT+3";
+select pg_reload_conf();
+
+
+
+
+https://linuxavante.com/como-definir-fuso-horario-e-habilitar-network-time-sync-ntp-na-linha-de-comando-usando-timedatectl
+
+
+
+
+timedatectl list-timezones
+
+sudo timedatectl set-timezone America/Sao_Paulo
+ 
+sudo apt-get update
+sudo apt-get install ntp ntpdate
+  
+service ntp stop
+ntpdate a.ntp.br
+service ntp start
+
+
+postgres 
+host    all             all             0.0.0.0/0            password
+Certifique-se de que o listen_addressesin postgresql.conf(ou ALTER SYSTEM SET) permite conexões de entrada em todas as interfaces IP disponíveis.
+listen_addresses = '*'
+
+De <https://stackoverflow.com/questions/3278379/how-to-configure-postgresql-to-accept-all-incoming-connections> 
+
+
+
+
+Editor vi
+https://www.vivaolinux.com.br/dica/VI-O-fantastico-editor-de-textos
+
+
+
+
+Como instalar postgre
+http://ltecnologia.com.br/blog/como-instalar-o-postgresql-no-ubuntu-20-04/
+Usuario
+https://www.vivaolinux.com.br/dica/Criacao-de-1edeg;-super-usuario-no-PostgreSQL
+
+
+
+Install  nodejs
+
+curl -fsSL https://deb.nodesource.com/setup_16sSSSssssSs.x | sudo -E bash -
+sudo apt-get install -y nodejs

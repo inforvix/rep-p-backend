@@ -1,0 +1,6 @@
+2023/06/05-08:30:44.506 5254 Reusing MANIFEST C:\PROJETOS\PontovixMTE\REP-P\backend\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
+2023/06/05-08:30:44.506 5254 Recovering log #31
+2023/06/05-08:30:44.508 5254 Reusing old log C:\PROJETOS\PontovixMTE\REP-P\backend\.wwebjs_auth\session\Default\Local Storage\leveldb/000031.log 
+2023/06/05-08:33:47.478 3288 Level-0 table #35: started
+2023/06/05-08:33:47.481 3288 Level-0 table #35: 23427 bytes OK
+2023/06/05-08:33:47.482 3288 Delete type=0 #31

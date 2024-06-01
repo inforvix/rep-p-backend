@@ -1,0 +1,19 @@
+X.509 / Formatos de chave
+O Xml-Crypto depende internamente do módulo de criptografia do nó. Isso significa que os certificados codificados por pem são suportados. Então, para assinar um xml, use key.pem que se parece com isso (apenas o início do conteúdo da chave é mostrado):
+
+-----BEGIN PRIVATE KEY-----
+MIICdwIBADANBgkqhkiG9w0...
+-----END PRIVATE KEY-----
+E para verificação use key_public.pem:
+
+-----BEGIN CERTIFICATE-----
+MIIBxDCCAW6gAwIBAgIQxUSX...
+-----END CERTIFICATE-----
+Convertendo certificados .pfx para pem
+
+Se você tiver certificados .pfx, poderá convertê-los em .pem usando openssl :
+
+openssl pkcs12 -in c:\certs\yourcert.pfx -out c:\certs\cag.pem
+Então você pode usar o resultado como está para fins de assinatura. Para fins de validação, 
+abra o .pem resultante com um editor de texto e copie de -----BEGIN CERTIFICATE----- para -----END CERTIFICATE----- 
+(incluindo) para um novo arquivo de texto e salve-o como .pem.
