@@ -25,6 +25,8 @@ const verifyToken = require('../helpers/verify-token')
  *                 type: string
  *               senha:
  *                 type: string
+ *               rep_padrao:
+ *                 type: integer
  *     responses:
  *       '200':
  *         description: Funcionário criado!
@@ -149,6 +151,8 @@ router.get('/pis/:pis',verifyToken,FuncionarioController.getFunByPIS)
  *         description: Acesso negado!  
  */
 router.patch('/edit/:cpf', verifyToken, FuncionarioController.editFun)
+
+router.post('/login', FuncionarioController.loginFuncionario)
 
 
 module.exports = router

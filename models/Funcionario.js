@@ -24,7 +24,11 @@ const Funcionario = db.define('Funcionario', {
     required: false,
   },
   senha: { type: DataTypes.STRING, },
-  ativo: { type: DataTypes.BOOLEAN, }
+  ativo: { type: DataTypes.BOOLEAN, },
+  rep_padrao: {
+    type: DataTypes.INTEGER,
+    required: false,
+  },
 }, {
   timestamps: false,
   createdAt: false,

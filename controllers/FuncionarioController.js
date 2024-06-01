@@ -6,6 +6,7 @@ const FunRep = require("../models/FuncionarioRep");
 const Operador = require("../models/Operador");
 const Marcacao = require("../models/Marcacao");
 
+const createUserTokenFuncionario = require("../helpers/create-token-funcionario");
 const getToken = require("../helpers/get-token");
 const getUserByToken = require("../helpers/get-user-by-token");
 const validaEmail = require("../helpers/valida-email");
@@ -14,13 +15,50 @@ const validaCPF = require("../helpers/validar-cpf");
 const crc_16 = require("../helpers/create-crc-16");
 
 module.exports = class FuncionarioController {
+
+  static async loginFuncionario(req, res) {
+    const { cpf, senha } = req.body;
+
+    if (!senha) {
+      res.status(422).json({ message: "Senha é obrigatório" });
+      return;
+    }
+    if (!cpf) {
+      res.status(422).json({ message: "login é obrigatório" });
+      return;
+    }
+
+    const funcionarioLogin = await Funcionario.findOne({ where: { cpf: cpf } });
+    if (!funcionarioLogin) {
+      res.status(422).json({ message: "Esse login não existe" });
+      return;
+    }
+
+    const checkPassword = await bcrypt.compare(senha, funcionarioLogin.senha);
+    if (!checkPassword) {
+      res.status(422).json({ message: "Senha Inválida" });
+      return;
+    }
+
+    if (!funcionarioLogin.ativo && funcionarioLogin.id != 1) {
+      return res.status(422).json({ message: "Funcionario desativado" });
+    }
+
+    try {
+      await createUserTokenFuncionario(funcionarioLogin, req, res);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+
+
   static async cadastrar(req, res) {
     const token = getToken(req);
     const empresa = await getUserByToken(token);
     const empresaid = empresa.id;
 
     let { cpf } = req.body;
-    const { nome, pis, email, senha, ativo, celular } = req.body;
+    const { nome, pis, email, senha, ativo, celular, rep_padrao } = req.body;
 
     if (!nome) {
       res.status(422).json({ message: "Nome é obrigatório" });
@@ -124,6 +162,7 @@ module.exports = class FuncionarioController {
         EmpresaId: empresaid,
         celular: celular,
         ativo: true,
+        rep_padrao: rep_padrao,
       }); //empresaid:EmpresaId,
 
       await newFunc.save();

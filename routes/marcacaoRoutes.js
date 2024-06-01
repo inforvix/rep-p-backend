@@ -3,6 +3,9 @@ const MarcacaoController = require('../controllers/MarcacaoController')
 
 const verifyToken = require('../helpers/verify-token')
 
+
+router.post('/registraToken', verifyToken, MarcacaoController.registraToken)
+
 /**
  * @openapi
  * /marcacao/registracpf/{cpf}/idrep/{id}:

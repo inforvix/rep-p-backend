@@ -146,8 +146,8 @@ app.use("/operador", OperadorRoutes);
 
 // Listen
 conn
-  //.sync()
-  .sync({ force: true })
+  .sync()
+  //.sync({ force: true })
   .then(() => {
     app.listen(port);
     // criar a 1 empresa detentora da aplicaçao
