@@ -14,7 +14,6 @@ const createUserTokenFuncionario = async(funcionario,req,res)=> {
     message:"Você está autenticado",
     token: token,
     empresa:funcionario.EmpresaId
-    //paramsenhafunc: emp.solicitasenhafunc,
   })
 
 }

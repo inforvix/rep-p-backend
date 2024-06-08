@@ -168,6 +168,7 @@ conn
           });
         });
       }
+      console.log('teste');
     });
   })
   .catch((err) => {
