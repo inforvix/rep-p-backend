@@ -1,10 +1,11 @@
-/*const {Sequelize} = require("sequelize");
-const sequelize = new Sequelize('teste2', 'sistema','sa.123',{
+const {Sequelize} = require("sequelize");
+const sequelize = new Sequelize('repp', 'postgres','masterkey',{
     dialect: 'postgres',
-    host: '192.168.1.89'
+    host: 'localhost'
 })
-module.exports = sequelize*/
+module.exports = sequelize
 
+/*
 const { Sequelize } = require("sequelize");
 
 const databaseUrl =
@@ -23,3 +24,4 @@ const sequelize = new Sequelize(databaseUrl, {
 });
 
 module.exports = sequelize;
+*/

@@ -88,7 +88,7 @@ router.post('/registrapis/:pis/idrep/:id', verifyToken, MarcacaoController.regis
  *       '401':
  *         description: Acesso negado!  
  */
- router.get('/recolher/:idrep/:nsr',verifyToken,MarcacaoController.recolheMarc)
+ router.get('/recolher/:idrep/:nsr', verifyToken, MarcacaoController.recolheMarc)
 
  router.get('/dia/:cpf',verifyToken,MarcacaoController.marcacaoFunc)
 

@@ -12,8 +12,14 @@ const validaCNPJ = require("../helpers/validar-cnpj");
 module.exports = class EmpresaController {
   static async cadastrar(req, res) {
     const token = getToken(req);
+    const empresa = await getUserByToken(token)  
+
+    if (empresa.id !== 1){
+      return res.status(401).json({message:'Acesso Negado!'})
+    }
 
     let { cnpj } = req.body;
+    
     const { contrato, login, senha, razao, fantasia, email } = req.body;
     if (!cnpj) {
       res.status(422).json({ message: "CNPJ é obrigatório" });

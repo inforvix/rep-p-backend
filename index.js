@@ -149,8 +149,7 @@ conn
   .sync()
   //.sync({ force: true })
   .then(() => {
-    app.listen(port);
-    // criar a 1 empresa detentora da aplicaçao
+    app.listen(port, console.log('Sistema rodando em http://localhost:5000/'));  
     Empresa.findOne({ where: { cnpj: "09267210000115" } }).then((value) => {
       if (!value) {
         bcrypt.genSalt(12).then((value) => {

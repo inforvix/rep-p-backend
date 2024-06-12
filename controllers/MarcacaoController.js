@@ -12,6 +12,7 @@ const getUserByTokenFuncionario = require('../helpers/get-user-by-token-funciona
 const sendMail = require('../helpers/enviar-email')
 const sendZap = require('../helpers/enviar-whatsapp')
 const hash_sha256 = require('../helpers/create-sha-256')
+
 module.exports = class MarcacaoController{
 
   static async registraToken(req,res){
@@ -40,14 +41,12 @@ module.exports = class MarcacaoController{
     console.log(repid)
 
     try{
-      console.log('Parou Aqui')
       const funcionario = await Funcionario.findOne({where:{cpf:cpf}})
       if (!funcionario){
         return res.status(422).json({message:'Funcionario não encontrado'})
       }
 
-
-      const funRep = await FunRep.findOne({where:{FuncionarioId:funcionario.id,RepPId:repid}})
+      const funRep = await FunRep.findOne({where:{FuncionarioId:funcionario.id ,RepPId:repid}})
       if (!funRep){
         return res.status(422).json({message:'Funcionario não cadastrado nesse Rep-p'})
       }
@@ -310,7 +309,6 @@ module.exports = class MarcacaoController{
     }
 
     try{
-     
       const { count, rows } = await Marcacao.findAndCountAll({limit: limit, offset: salto, where:{RepPId:repid,tipoRegistro:7,nsr:{[Op.gte]:nsr}}
         , order: [
           ['id', 'ASC'],
