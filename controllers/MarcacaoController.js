@@ -15,16 +15,15 @@ const hash_sha256 = require('../helpers/create-sha-256')
 
 module.exports = class MarcacaoController{
 
+  
+
   static async registraToken(req,res){
     const cpf = req.user.fun_cpf
     const repid = req.user.fun_rep_padrao
     const empresaId = req.user.fun_empresa
 
-    console.log(cpf, repid, empresaId)
-
     const token = getToken(req)
     const empresa = await getUserByTokenFuncionario(token) 
-    console.log(empresa)
     const online = 0 //rep-p Informar "0" para marcação on-line ou "1" para marcaçãooff-line.
     const tipoRegistro = 7
     const tipoOperacao = req.get('tipoOperacao') //rep-p "01": aplicativo mobile; "02":browser(navegador internet); "03": aplicativo desktop; "04": dispositivo eletrônico; "05": outro dispositivo eletrônico não especificado acima.
@@ -33,12 +32,10 @@ module.exports = class MarcacaoController{
     if (!cpf){
       return res.status(422).json({message:'O CPF é obrigatório'})
     }
-    console.log(cpf)
     
     if (!repid){
       return res.status(422).json({message:'O ID do Rep-P é obrigatório'})
     }
-    console.log(repid)
 
     try{
       const funcionario = await Funcionario.findOne({where:{cpf:cpf}})
@@ -60,14 +57,10 @@ module.exports = class MarcacaoController{
         return res.status(422).json({message:'Rep-P não está ativo'})
       }
 
-      console.log(rep.EmpresaId)
-      console.log(empresaId)
-      
       if (rep.EmpresaId != empresaId ){
         return res.status(401).json({message:'Acesso Negado! Rep não pertence a sua empesa'})
       }
       
-
       let ultimaMarc = await Marcacao.findOne({
         attributes: [[sequelize.fn('max', sequelize.col('nsr')), 'nsr']],
         where:{RepPId:rep.id},
@@ -101,6 +94,7 @@ module.exports = class MarcacaoController{
         
       marc.save();
       res.status(200).json('Marcação inserida')
+      console.log('Irei chamar a funcao de envio de email')
       sendMail(funcionario,marc,date);
       if (funcionario.celular != undefined)
       {sendZap(funcionario,marc,date);}
@@ -285,7 +279,7 @@ module.exports = class MarcacaoController{
   static async recolheMarc(req,res){
     const nsr = req.params.nsr
     const page = parseInt(req.query.page || 1)
-    const limit = req.query.limit || 100
+    const limit = req.query.limit || 20
     const salto = (page - 1)*limit;
     if (!nsr){
       nsr = 1
@@ -317,7 +311,7 @@ module.exports = class MarcacaoController{
       })
 
       const totPage = Math.ceil(count/limit)
-      res.status(200).json({pagina:page,totalPaginas:totPage, marcacoes:rows})
+      res.status(200).json({pagina:page,totalpaginas:totPage,marcacoes:rows})
 
     }catch(err){
       res.status(500).json(err.message)
@@ -339,6 +333,37 @@ module.exports = class MarcacaoController{
           ['id', 'ASC'],
         ],
         attributes: ["nsr", "cpf", "data", "hora", "cnpj", "inpi_codigo" ]
+      })
+
+      res.status(200).json({marcacoes:rows})
+
+    }catch(err){
+      res.status(500).json(err.message)
+    }
+  }
+
+  static async buscarMarcacaoPorPeriodo(req,res){
+    const cpf = req.params.cpf
+    const dataInicio = req.params.dataInicio
+    const dataFim = req.params.dataFim
+
+    const token = getToken(req)
+    const empresa = await getUserByToken(token) 
+
+    try {
+      const rows = await Marcacao.findAll({
+        where: {
+          tipoRegistro: 7,
+          cpf: cpf,
+          data: {
+            [Op.gte]: new Date(dataInicio),  
+            [Op.lte]: new Date(dataFim)
+          }
+        }
+        , order: [
+          ['id', 'ASC'],
+        ],
+        attributes: ["nsr", "cpf", "data", "hora", "cnpj", "inpi_codigo"]
       })
 
       res.status(200).json({marcacoes:rows})

@@ -3,9 +3,28 @@ const MarcacaoController = require('../controllers/MarcacaoController')
 
 const verifyToken = require('../helpers/verify-token')
 
+/**
+ * @openapi
+ * /marcacao/registraToken/:
+ *   post:
+ *     description: Registra marcação pelo TOKEN gerado ao fazer o login!
+ *     parameters:
+ *       - in: headers
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: FMarcação registrada!
+ *       '500':
+ *         description: Erro na tranasção com banco!
+ *       '401':
+ *         description: Acesso negado!    
+ */
+
 
 router.post('/registraToken', verifyToken, MarcacaoController.registraToken)
-
 /**
  * @openapi
  * /marcacao/registracpf/{cpf}/idrep/{id}:
@@ -55,7 +74,7 @@ router.post('/registracpf/:cpf/idrep/:id', verifyToken, MarcacaoController.regis
  *       '401':
  *         description: Acesso negado!    
  */
-router.post('/registrapis/:pis/idrep/:id', verifyToken, MarcacaoController.registraPIS)
+router.post('/registrapis/:pis/idrep/:id', verifyToken , MarcacaoController.registraPIS)
 /**
  * @openapi
  * /marcacao/recolher/{idrep}/{nsr}:
@@ -91,5 +110,7 @@ router.post('/registrapis/:pis/idrep/:id', verifyToken, MarcacaoController.regis
  router.get('/recolher/:idrep/:nsr', verifyToken, MarcacaoController.recolheMarc)
 
  router.get('/dia/:cpf',verifyToken,MarcacaoController.marcacaoFunc)
+
+ router.get('/:dataInicio/:dataFim/:cpf',verifyToken,MarcacaoController.buscarMarcacaoPorPeriodo)
 
 module.exports = router

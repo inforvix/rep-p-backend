@@ -10,6 +10,8 @@ const assinatura = require("../helpers/assinatura-eletronica")
 // }
 
 async function sendMail(func, marc, dataPadrao) {
+
+    console.log('Inicio de envio de email')
   
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({

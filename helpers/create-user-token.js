@@ -9,7 +9,7 @@ const createUserToken = async(emp,req,res)=> {
   res.status(200).json({
     message:"Você está autenticado",
     token: token,
-    userId:emp.id,
+    userid:emp.id,
     paramsenhafunc: emp.solicitasenhafunc,
   })
 

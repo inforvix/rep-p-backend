@@ -147,15 +147,18 @@ app.use("/operador", OperadorRoutes);
 // Listen
 conn
   .sync()
+  //FAVOR NAO MEXER EDUARDO, ISSO JA ESTA EM PRODUÇÃO
+  //EXISTEM CLIENTES USANDO..
+  //NÂO VOLTE AQUI....
   //.sync({ force: true })
   .then(() => {
     app.listen(port, console.log('Sistema rodando em http://localhost:5000/'));  
-    Empresa.findOne({ where: { cnpj: "09267210000115" } }).then((value) => {
+    Empresa.findOne({ where: { cnpj: "73172362000133" } }).then((value) => {
       if (!value) {
         bcrypt.genSalt(12).then((value) => {
           passwordHash = bcrypt.hash("guedes", value).then((value) => {
             Empresa.create({
-              cnpj: "09267210000115",
+              cnpj: "73172362000133",
               contrato: "00000",
               login: "guedes",
               senha: value,
