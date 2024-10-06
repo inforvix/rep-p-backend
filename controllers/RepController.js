@@ -164,7 +164,7 @@ module.exports = class RepController{
           return res.status(422).json({message:'Empresa não encontrada'}) 
         }
         let {cnpj} = req.body
-        const {id,local,nome_rep,razao,ativo,empresaid} = req.body
+        const {id,local,nome_rep,razao,ativo,numero_serial,empresaid} = req.body
         
         if (empresa.id != empresaid){
           return res.status(401).json({message:'Acesso Negado! Rep não pertence a sua empesa'})
@@ -198,6 +198,9 @@ module.exports = class RepController{
         
         if (local)
         {rep.local = local}
+        
+        if (numero_serial)
+          {rep.numero_serial = numero_serial}
         
         if(ativo != undefined)
         {rep.ativo = ativo} 

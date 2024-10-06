@@ -14,7 +14,9 @@ const RepP = db.define('RepP',{
       required: true,},  
     razao: {type: DataTypes.STRING,
       required: false,},  
-    ativo: {type: DataTypes.BOOLEAN,} 
+    ativo: {type: DataTypes.BOOLEAN,},
+    numero_serial: {type: DataTypes.STRING,
+      required: false,},
   },{
     timestamps: false,
     createdAt: false,

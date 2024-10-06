@@ -149,8 +149,7 @@ conn
   .sync()
   //FAVOR NAO MEXER EDUARDO, ISSO JA ESTA EM PRODUÇÃO
   //EXISTEM CLIENTES USANDO..
-  //NÂO VOLTE AQUI....
-  //.sync({ force: true })
+  //NÂO VOLTE AQUI....//.sync({ force: true })
   .then(() => {
     app.listen(port, console.log('Sistema rodando em http://localhost:5000/'));  
     Empresa.findOne({ where: { cnpj: "73172362000133" } }).then((value) => {

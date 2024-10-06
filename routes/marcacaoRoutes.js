@@ -113,4 +113,7 @@ router.post('/registrapis/:pis/idrep/:id', verifyToken , MarcacaoController.regi
 
  router.get('/:dataInicio/:dataFim/:cpf',verifyToken,MarcacaoController.buscarMarcacaoPorPeriodo)
 
+ router.post('/faceid/new_user_identified.fcgi', MarcacaoController.marcacaoFaceID)
+ router.post('/faceid/device_is_alive.fcgi', MarcacaoController.reconectarAoServidor)
+ router.get('/faceid/device_is_alive.fcgi', MarcacaoController.reconectarAoServidor)
 module.exports = router

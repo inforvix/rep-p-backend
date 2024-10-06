@@ -100,7 +100,7 @@ router.get('/:id',verifyToken,RepController.getById)
  *       '401':
  *         description: Acesso negado!  
  */
-router.get('/buscacnpj/:cnpj',verifyToken,RepController.getRepByCNPJ)
+router.get('/buscacnpj/:cnpj', verifyToken, RepController.getRepByCNPJ)
 /**
  * @openapi
  * /rep/edit:
