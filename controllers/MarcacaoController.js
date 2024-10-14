@@ -17,59 +17,156 @@ const hash_sha256 = require('../helpers/create-sha-256')
 
 module.exports = class MarcacaoController {
 
-
-
   static async reconectarAoServidor(req, res) {
     //console.log('Aparalho ativo')
     res.status(200).send('')
   }
+
   static async marcacaoFaceID(req, res) {
     let body = '';
-    
+
     // Recebe os dados do corpo da requisição
     await req.on('data', chunk => {
-        body += chunk.toString();
+      body += chunk.toString();
     });
+
 
     // Extrai o número serial do corpo
     var numeroSerial = await extrairParametroFaceId(body, "device_id");
-    var idFuncionario = await extrairParametroFaceId(body, "user_id");
+    const idFuncionario = await extrairParametroFaceId(body, "user_id");
     var nomeFuncionario = await extrairParametroFaceId(body, "user_name");
 
-    // Busca o REP pelo número serial
-    const reps = await Rep.findAll({ where: { numero_serial: numeroSerial } });
+    var cpf = idFuncionario.slice(-11);
+    var idEmpresa = idFuncionario.slice(0,-11);
 
-    // Verifica se o REP foi encontrado
-    if (reps.length < 1) {  
-        return res.status(400).json({
-            "result": {
-                "event": 6,
-                "user_id": 1,
-                "user_name": "REP NÃO ENCONTRADO",
-                "user_image": false,
-                "portal_id": 1,
-                "actions": []
-            }
-        });
+    if (idFuncionario == 0) {
+      //RELOGIO NAO IDENTIFICOU FUNCIONARIO
+      return res.status(200).json({
+        "result": {
+          "event": 6,
+          "user_id": 6,
+          "user_name": "100 - Erro",
+          "user_image": false,
+          "portal_id": 1,
+          "actions": []
+        }
+      });
     }
 
-    var relogioId = reps[0].id
-    var empresaId = reps[0].EmpresaId
-
-    var jsonRetorno = {
+    // Busca o REP pelo número serial
+    const reps = await Rep.findAll({ where: { numero_serial: numeroSerial, EmpresaId:  idEmpresa} });
+    if (reps.length < 1) {
+      //REP NAO CADASTRADO NO REP-P
+      return res.status(200).json({
         "result": {
-            "event": 7,
+          "event": 6,
+          "user_id": 6,
+          "user_name": "101 - Erro",
+          "user_image": false,
+          "portal_id": 1,
+          "actions": []
+        }
+      });
+    }
+
+    const repid = reps[0].id
+    const cnpj_cpf_emp = reps[0].cnpj_cpf_emp
+    const local = reps[0].local
+    const online = 0 //rep-p Informar "0" para marcação on-line ou "1" para marcaçãooff-line.
+    const tipoRegistro = 7
+    const tipoOperacao = req.get('tipoOperacao') //rep-p "01": aplicativo mobile; "02":browser(navegador internet); "03": aplicativo desktop; "04": dispositivo eletrônico; "05": outro dispositivo eletrônico não especificado acima.
+
+
+
+    try {
+      const funcionario = await Funcionario.findOne({ where: { cpf: cpf } })
+      if (!funcionario) {
+        //FUNCIONARIO NAO ENCONTRADO
+        return res.status(200).json({
+          "result": {
+            "event": 6,
             "user_id": 6,
-            "user_name": "nomeFuncionario",
+            "user_name": "102 - Erro",
             "user_image": false,
             "portal_id": 1,
             "actions": []
-        }
-    };
+          }
+        });
+      }
 
-    // Envia a resposta de sucesso
-    return res.status(200).json(jsonRetorno);
-}
+      const funRep = await FunRep.findOne({ where: { FuncionarioId: funcionario.id, RepPId: repid } })
+      if (!funRep) {
+        //FUNCIONARIO NAO CADASTRADO NO REP
+        return res.status(200).json({
+          "result": {
+            "event": 6,
+            "user_id": 6,
+            "user_name": "103 - Erro",
+            "user_image": false,
+            "portal_id": 1,
+            "actions": []
+          }
+        });
+      }
+
+      let ultimaMarc = await Marcacao.findOne({
+        attributes: [[sequelize.fn('max', sequelize.col('nsr')), 'nsr']],
+        where: { RepPId: repid },
+      })
+
+      if (ultimaMarc.nsr == null) {
+        ultimaMarc.nsr = 1;
+      } else { ultimaMarc.nsr++ }
+
+      let hashAnterior
+      if (ultimaMarc.tipoRegistro == 7) {
+        hashAnterior = ultimaMarc.crc16_sha256
+      } else { hashAnterior = '' }
+
+      const dateFull = new Date();
+
+      const dia = dateFull.getDate().toString().padStart(2, '0');
+      const mes = (dateFull.getMonth() + 1).toString().padStart(2, '0');
+      const ano = dateFull.getFullYear().toString();
+      const date = `${mes}/${dia}/${ano}`;
+
+      const hora = dateFull.toLocaleString().split(' ')[1];
+
+      //online mas offline 
+      let codigoHash = ultimaMarc.nsr + tipoRegistro + date + hora + cpf + date + hora + tipoOperacao + online + hashAnterior
+      codigoHash = hash_sha256(codigoHash)
+      const marc = await Marcacao.create({
+        data: date, hora: hora, nsr: ultimaMarc.nsr, cpf: cpf, cnpj: cnpj_cpf_emp,
+        local: local, inpi_codigo: 'const inpi', RepPId: repid, FuncionarioId: funcionario.id,
+        tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash
+      })
+
+      marc.save();
+      sendMail(funcionario, marc, date);
+      return res.status(200).json({
+        "result": {
+          "event": 7,
+          "user_id": 6,
+          "user_name": nomeFuncionario,
+          "user_image": false,
+          "portal_id": 1,
+          "actions": []
+        }
+      });
+    } catch (err) {
+      return res.status(200).json({
+        "result": {
+          "event": 6,
+          "user_id": 6,
+          "user_name": "104 - Erro",
+          "user_image": false,
+          "portal_id": 1,
+          "actions": []
+        }
+      });
+    }
+
+  }
 
 
 
