@@ -5,6 +5,15 @@ const sequelize = new Sequelize('repp', 'postgres','masterkey',{
 })
 module.exports = sequelize
 
+
+// const {Sequelize} = require("sequelize");
+// const sequelize = new Sequelize('repp', 'postgres','masterkey',{
+//     dialect: 'postgres',
+//     host: 'localhost'
+// })
+// module.exports = sequelize
+
+
 /*
 const { Sequelize } = require("sequelize");
 
