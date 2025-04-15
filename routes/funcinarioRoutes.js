@@ -150,7 +150,7 @@ router.get('/pis/:pis',verifyToken,FuncionarioController.getFunByPIS)
  *       '401':
  *         description: Acesso negado!  
  */
-router.patch('/edit/:cpf', verifyToken, FuncionarioController.editFun)
+router.post('/edit/:cpf', verifyToken, FuncionarioController.editFun)
 
 router.post('/login', FuncionarioController.loginFuncionario)
 

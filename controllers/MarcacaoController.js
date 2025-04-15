@@ -36,6 +36,8 @@ module.exports = class MarcacaoController {
     const idFuncionario = await extrairParametroFaceId(body, "user_id");
     var nomeFuncionario = await extrairParametroFaceId(body, "user_name");
 
+    console.log(numeroSerial);
+
     var cpf = idFuncionario.slice(-11);
     var idEmpresa = idFuncionario.slice(0,-11);
 
@@ -75,8 +77,6 @@ module.exports = class MarcacaoController {
     const online = 0 //rep-p Informar "0" para marcação on-line ou "1" para marcaçãooff-line.
     const tipoRegistro = 7
     const tipoOperacao = req.get('tipoOperacao') //rep-p "01": aplicativo mobile; "02":browser(navegador internet); "03": aplicativo desktop; "04": dispositivo eletrônico; "05": outro dispositivo eletrônico não especificado acima.
-
-
 
     try {
       const funcionario = await Funcionario.findOne({ where: { cpf: cpf } })
@@ -168,13 +168,12 @@ module.exports = class MarcacaoController {
 
   }
 
-
-
-
   static async registraToken(req, res) {
     const cpf = req.user.fun_cpf
     const repid = req.user.fun_rep_padrao
     const empresaId = req.user.fun_empresa
+    //const longitude = req.params.longitude
+    //console.log('a latitude informado foi: ' + longitude)
 
     const token = getToken(req)
     const empresa = await getUserByTokenFuncionario(token)
@@ -182,6 +181,7 @@ module.exports = class MarcacaoController {
     const tipoRegistro = 7
     const tipoOperacao = req.get('tipoOperacao') //rep-p "01": aplicativo mobile; "02":browser(navegador internet); "03": aplicativo desktop; "04": dispositivo eletrônico; "05": outro dispositivo eletrônico não especificado acima.
 
+    console.log('Registrnado via token');
 
     if (!cpf) {
       return res.status(422).json({ message: 'O CPF é obrigatório' })
@@ -244,9 +244,10 @@ module.exports = class MarcacaoController {
       const marc = await Marcacao.create({
         data: date, hora: hora, nsr: ultimaMarc.nsr, cpf: cpf, cnpj: rep.cnpj_cpf_emp,
         local: rep.local, inpi_codigo: 'const inpi', RepPId: rep.id, FuncionarioId: funcionario.id,
-        tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash
+        tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash 
       })
 
+      
       marc.save();
       res.status(200).json('Marcação inserida')
       console.log('Irei chamar a funcao de envio de email')
@@ -262,25 +263,26 @@ module.exports = class MarcacaoController {
 
   static async registraCPF(req, res) {
     const cpf = req.params.cpf
-    const repid = req.params.id
-
+    
     const token = getToken(req)
     const empresa = await getUserByToken(token)
     const online = 0 //rep-p Informar "0" para marcação on-line ou "1" para marcaçãooff-line.
     const tipoRegistro = 7
     const tipoOperacao = req.get('tipoOperacao') //rep-p "01": aplicativo mobile; "02":browser(navegador internet); "03": aplicativo desktop; "04": dispositivo eletrônico; "05": outro dispositivo eletrônico não especificado acima.
 
-
     if (!cpf) {
       return res.status(422).json({ message: 'O CPF é obrigatório' })
     }
+
+    const funcionario = await Funcionario.findOne({ where: { cpf: cpf, EmpresaId: empresa.id } })
+    const repid = funcionario.rep_padrao
 
     if (!repid) {
       return res.status(422).json({ message: 'O ID do Rep-P é obrigatório' })
     }
 
     try {
-      const funcionario = await Funcionario.findOne({ where: { cpf: cpf, EmpresaId: empresa.id } })
+     
       if (!funcionario) {
         return res.status(422).json({ message: 'Funcionario não encontrado' })
       }
@@ -465,6 +467,7 @@ module.exports = class MarcacaoController {
         return res.status(422).json({ message: 'Rep-P não encontrado' })
       }
 
+      console.log('Verificando se o REP esta ATIVO FACE ID')
       if (!rep.ativo) {
         return res.status(422).json({ message: 'Rep-P não está ativo' })
       }
@@ -533,6 +536,8 @@ module.exports = class MarcacaoController {
       res.status(422).json({ message: 'Rep-P não encontrado' })
     }
 
+
+    console.log('Recolhendo Marcaçao')
     if (!rep.ativo) {
       res.status(422).json({ message: 'Rep-P não está ativo' })
     }
@@ -560,7 +565,6 @@ module.exports = class MarcacaoController {
 
   static async marcacaoFunc(req, res) {
     const cpf = req.params.cpf
-    //const repid = req.params.idrep
 
     const token = getToken(req)
     const empresa = await getUserByToken(token)

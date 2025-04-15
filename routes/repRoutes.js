@@ -159,6 +159,9 @@ router.get('/datahora/agora', RepController.getHora)
  *       '401':
  *         description: Acesso negado!  
  */
-router.get('/afd/:id', RepController.afd)
+router.post('/afd/:id', RepController.afd)
+
+
+router.get('/arp/:id', RepController.arp)
 
 module.exports = router
