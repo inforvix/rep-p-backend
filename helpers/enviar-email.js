@@ -57,13 +57,12 @@ async function sendMail(func, marc, dataPadrao) {
             "<p>hash: "+marc.crc16_sha256+"</p>"+
             "<p>Assinatura: "+assinaturaComprovante+"</p>"      
     let info = await transporter.sendMail({
-      from: '"Comprovante Pontovix Rep-P" <envio@inforvix.com.br>', // sender address
-      to: func.email, // list of receivers
-      subject:  dataPadrao+" "+ marc.hora+" Registro de Ponto - Pontovix", // Subject line
-      text: texto, // plain text body
-      html: textoHTML, // html body
+      from: '"Comprovante Pontovix Rep-P" <envio@inforvix.com.br>', 
+      to: func.email,
+      subject:  dataPadrao+" "+ marc.hora+" Registro de Ponto - Pontovix", 
+      text: texto,
+      html: textoHTML, 
     });
-  
   }
 
   module.exports = sendMail

@@ -16,6 +16,7 @@ const pad = require('../helpers/string-pad')
 const archiver = require('archiver');
 const afdLayout = require('../helpers/layout-AFD')
 const assinatura = require("../helpers/assinatura-eletronica")
+const sendMailArp = require('../helpers/enviar-email-afd')
 
 module.exports = class RepController{
 
@@ -248,14 +249,36 @@ module.exports = class RepController{
       res.status(200).json({data:date,hora:hora,timezone:'UTC -3 São Paulo'})
     }
 
+    static async arp(req, res) {
+      const id = req.params.id
+      try {
+        
+          const whereClause = {
+            RepPId: id,
+        };
+
+          const arp = await Marcacao.findAndCountAll({
+             
+              where: whereClause,
+          });
+  
+          res.status(200).json(arp);
+      } catch (err) {
+          console.error(err);
+          res.status(500).json({ message: 'Erro ao buscar ARP', error: err.message });
+      }
+    }  
+
     static async afd(req,res){
       //const token = getToken(req)
       //const empresa = await getUserByToken(token) 
-      let dataIni = req.get('dataini')
-      let dataFim = req.get('datafim')
-      if (dataFim){
-        dataFim = dataFim.substring(0,8)+ pad.leftPad((parseInt(dataFim.substring(9,11))+1).toString(),2,'0')
-      }
+      
+      const { dataIni, dataFim } = req.query;
+
+      const { email } = req.body;
+      // if (dataFim){
+      //   dataFim = dataFim.substring(0,8)+ pad.leftPad((parseInt(dataFim.substring(9,11))+1).toString(),2,'0')
+      // }
       const id = req.params.id
       
       //if (!empresa){
@@ -283,10 +306,20 @@ module.exports = class RepController{
         ],
       }) 
       
+      console.log('Dada ini: ' + dataIni)
+      console.log('Dada fim: ' + dataFim)
+      
+      function formatarData(dataString) {
+        const [dia, mes, ano] = dataString.split('-');
+        return new Date(`${ano}-${mes}-${dia}T00:00:00Z`); // Garante compatibilidade com o fuso horário UTC
+      }
+      
       if (dataIni && dataFim){
+        const dataInicioFormatada = formatarData(dataIni);
+        const dataFimFormatada = formatarData(dataFim);
         var { count, rows } = await Marcacao.findAndCountAll({ where:{RepPId:rep.id, 
           createdAt: {
-            [Op.between]: [new Date(dataIni), new Date(dataFim)],
+            [Op.between]: [new Date(dataInicioFormatada), new Date(dataFimFormatada)],
           }},
           order: [
             ['nsr', 'ASC'],
@@ -313,6 +346,8 @@ module.exports = class RepController{
       
       const nomeArq = `./public/afd/AFD_#inipcodigo#_${cnpj}_\REP_P${rep.id}.txt`
       const nomeArqCripto = `./public/afd/AFD_#inipcodigo#_${cnpj}_\REP_P${rep.id}.txt.p7s`
+
+     sendMailArp(email, nomeArq)
       
       const arquivos = [
         {
@@ -394,12 +429,15 @@ module.exports = class RepController{
         zlib: { level: 9 } // Nível de compressão máximo
       });
 
+      
       // Definir cabeçalhos da resposta para o download
       res.attachment(nomeArquivoZip);
-
+      
+      
+      
       // Pipe a saída do arquivo ZIP para a resposta HTTP
       zip.pipe(res);
-
+      
       // Adicionar cada arquivo ao arquivo ZIP
       arquivos.forEach((arquivo) => {
         zip.append(fs.createReadStream(arquivo.caminho), { name: arquivo.nome });
@@ -407,18 +445,20 @@ module.exports = class RepController{
       
       // Finalizar o arquivo ZIP e enviar a resposta
       await zip.finalize();  
-      
+
       output.close();
+      
       
       // Remover o arquivo ZIP após a conclusão do download
       res.on('finish', () => {
         console.log('finish');
       });
-
+      
       output.on('close', () => {
         console.log('close');
         fs.unlinkSync(nomeArquivoZip);
       });
-
+      
+      
     }
 }                                                        
