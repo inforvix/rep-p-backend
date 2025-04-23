@@ -445,7 +445,7 @@ module.exports = class FuncionarioController {
 
         const marc = await Marcacao.create({
           nsr: ultimaMarc.nsr,
-          inpi_codigo: "const inpi",
+          inpi_codigo: "BR 51 2025 001324-8",
           cpfResponsavel: cpfResponsavel,
           FuncionarioId: funcionario.id,
           RepPId: funcRep[key].RepPId,

@@ -137,7 +137,7 @@ module.exports = class MarcacaoController {
       codigoHash = hash_sha256(codigoHash)
       const marc = await Marcacao.create({
         data: date, hora: hora, nsr: ultimaMarc.nsr, cpf: cpf, cnpj: cnpj_cpf_emp,
-        local: local, inpi_codigo: 'const inpi', RepPId: repid, FuncionarioId: funcionario.id,
+        local: local, inpi_codigo: 'BR 51 2025 001324-8', RepPId: repid, FuncionarioId: funcionario.id,
         tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash
       })
 
@@ -243,7 +243,7 @@ module.exports = class MarcacaoController {
       codigoHash = hash_sha256(codigoHash)
       const marc = await Marcacao.create({
         data: date, hora: hora, nsr: ultimaMarc.nsr, cpf: cpf, cnpj: rep.cnpj_cpf_emp,
-        local: rep.local, inpi_codigo: 'const inpi', RepPId: rep.id, FuncionarioId: funcionario.id,
+        local: rep.local, inpi_codigo: 'BR 51 2025 001324-8', RepPId: rep.id, FuncionarioId: funcionario.id,
         tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash 
       })
 
@@ -333,7 +333,7 @@ module.exports = class MarcacaoController {
       codigoHash = hash_sha256(codigoHash)
       const marc = await Marcacao.create({
         data: date, hora: hora, nsr: ultimaMarc.nsr, cpf: cpf, cnpj: rep.cnpj_cpf_emp,
-        local: rep.local, inpi_codigo: 'const inpi', RepPId: rep.id, FuncionarioId: funcionario.id,
+        local: rep.local, inpi_codigo: 'BR 51 2025 001324-8', RepPId: rep.id, FuncionarioId: funcionario.id,
         tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash
       })
 
@@ -416,7 +416,7 @@ module.exports = class MarcacaoController {
       codigoHash = hash_sha256(codigoHash)
       const marc = await Marcacao.create({
         data: date, hora: hora, nsr: ultimaMarc.nsr, cpf: funcionario.cpf, cnpj: rep.cnpj_cpf_emp,
-        local: rep.local, inpi_codigo: 'const inpi', RepPId: rep.id, FuncionarioId: funcionario.id,
+        local: rep.local, inpi_codigo: 'BR 51 2025 001324-8', RepPId: rep.id, FuncionarioId: funcionario.id,
         tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash
       })
 
@@ -504,7 +504,7 @@ module.exports = class MarcacaoController {
       codigoHash = hash_sha256(codigoHash)
       const marc = await Marcacao.create({
         data: date, hora: hora, nsr: ultimaMarc.nsr, cpf: cpf, cnpj: rep.cnpj_cpf_emp,
-        local: rep.local, inpi_codigo: 'const inpi', RepPId: rep.id, FuncionarioId: funcionario.id,
+        local: rep.local, inpi_codigo: 'BR 51 2025 001324-8', RepPId: rep.id, FuncionarioId: funcionario.id,
         tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash
       })
 
