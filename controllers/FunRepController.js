@@ -191,7 +191,7 @@ module.exports = class FunRepController{
           let codigoCrc = ultimaMarc.nsr + tipoRegistro + date + cpfResponsavel + 'E' + fun.cpf + fun.nome 
           codigoCrc = crc_16(codigoCrc)
           
-          const marc = await Marcacao.create({nsr:ultimaMarc.nsr,inpi_codigo:'const inpi',cpfResponsavel:cpfResponsavel,FuncionarioId:fun.id,
+          const marc = await Marcacao.create({nsr:ultimaMarc.nsr,inpi_codigo:'BR 51 2025 001324-8',cpfResponsavel:cpfResponsavel,FuncionarioId:fun.id,
           RepPId:rep.id, cpf:fun.cpf, nome:fun.nome, tipoRegistro:tipoRegistro,tipoOperacao:'E',crc16_sha256:codigoCrc})
           
           res.status(200).json({message:'Funcionário '+fun.nome+' apagado no Rep-P'})

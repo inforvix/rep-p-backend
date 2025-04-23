@@ -592,29 +592,30 @@ module.exports = class MarcacaoController {
     const dataInicio = req.params.dataInicio
     const dataFim = req.params.dataFim
 
-    const token = getToken(req)
-    const empresa = await getUserByToken(token)
-
     try {
+      const inicio = new Date(dataInicio);
+      inicio.setHours(0, 0, 0, 0);
+    
+      const fim = new Date(dataFim);
+      fim.setHours(23, 59, 59, 999);
+    
       const rows = await Marcacao.findAll({
         where: {
           tipoRegistro: 7,
           cpf: cpf,
           data: {
-            [Op.gte]: new Date(dataInicio),
-            [Op.lte]: new Date(dataFim)
+            [Op.gte]: inicio,
+            [Op.lte]: fim
           }
-        }
-        , order: [
-          ['id', 'ASC'],
-        ],
+        },
+        order: [['id', 'ASC']],
         attributes: ["nsr", "cpf", "data", "hora", "cnpj", "inpi_codigo"]
-      })
-
-      res.status(200).json({ marcacoes: rows })
-
+      });
+    
+      res.status(200).json({ marcacoes: rows });
+    
     } catch (err) {
-      res.status(500).json(err.message)
+      res.status(500).json(err.message);
     }
   }
 
