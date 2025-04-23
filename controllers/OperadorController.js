@@ -6,6 +6,26 @@ const validaCPF = require('../helpers/validar-cpf')
 
 module.exports = class OperadorController{
 
+
+  static async getOperadorByCPF(req, res) {
+    const token = getToken(req);
+    const empresa = await getUserByToken(token);
+
+    const cpf = req.params.cpf;
+
+    try {
+      const operador = await Operador.findOne({
+        where: { cpf: cpf, EmpresaId: empresa.id },
+      });
+      if (!operador) {
+        res.status(422).json({ message: "Funcionaio não encontrado" });
+      }
+      res.status(200).json(funcionario);
+    } catch (err) {
+      res.status(500).json(err.message);
+    }
+  }
+
     static async cadastrar(req,res){
 
         const token = getToken(req)
@@ -39,7 +59,7 @@ module.exports = class OperadorController{
              
         const existe = await Operador.findOne({where:{cpf:cpf,EmpresaId:empresa.id}})
 
-        if (existe){return res.status(422).json({message:'O Operador já está cadastrado com esse CPF'})}
+        if (existe){return res.status(200).json({message:'O Operador já está cadastrado com esse CPF'})}
 
         try{
           const funRep = await Operador.create({nome:nome,cpf:cpf,EmpresaId:empresa.id,ativo:ativo})//empresaid:EmpresaId,

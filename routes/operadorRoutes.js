@@ -32,5 +32,7 @@ const verifyToken = require('../helpers/verify-token')
  *         description: Acesso negado!      
  */
 router.post('/cadastrar', verifyToken, OperadorController.cadastrar)
+router.post('/buscar-cpf/:cpf', verifyToken, OperadorController.getOperadorByCPF)
+
 
 module.exports = router

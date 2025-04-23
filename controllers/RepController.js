@@ -17,15 +17,13 @@ const archiver = require('archiver');
 const afdLayout = require('../helpers/layout-AFD')
 const assinatura = require("../helpers/assinatura-eletronica")
 
-
-
 module.exports = class RepController{
 
     static async cadastrar(req,res){
         // erro ao cadastrar segundo rep da empreas 
         const token = getToken(req)
         const empresa = await getUserByToken(token)    
-        const inpi = '10000000000004'
+        const inpi = 'BR 51 2025 001324-8'
         const idEmpresa = req.params.idempresa      
 
         if (empresa.id !== 1){
@@ -228,7 +226,7 @@ module.exports = class RepController{
           let codigoCrc = ultimaMarc.nsr + tipoRegistro + date+ cpfResponsavel + '1' + rep.cnpj_cpf_emp + razao+ local
           codigoCrc = crc_16(codigoCrc)
           
-          const marc = await Marcacao.create({nsr:ultimaMarc.nsr,inpi_codigo:'const inpi',cpfResponsavel:cpfResponsavel,cnpj:rep.cnpj_cpf_emp,
+          const marc = await Marcacao.create({nsr:ultimaMarc.nsr,inpi_codigo:'BR 51 2025 001324-8',cpfResponsavel:cpfResponsavel,cnpj:rep.cnpj_cpf_emp,
           local:rep.local,RepPId:rep.id, tipoRegistro:tipoRegistro,tipoOperacao:'1',crc16_sha256:codigoCrc,razao:razao})
           
           

@@ -1,4 +1,5 @@
 const sequelize = require("sequelize");
+const { Op } = require('sequelize'); 
 
 const bcrypt = require("bcrypt");
 const Funcionario = require("../models/Funcionario");
@@ -217,15 +218,32 @@ module.exports = class FuncionarioController {
     const empresa = await getUserByToken(token);
 
     try {
-      const funcionario = await Funcionario.findAll({
-        attributes: { exclude: ["senha"] },
-        where: { EmpresaId: empresa.id },
-      });
-      res.status(200).json(funcionario);
+        const { filtro } = req.query;
+
+        const whereClause = {
+          EmpresaId: empresa.id,
+      };
+
+      if (filtro) {
+          whereClause[Op.or] = [
+              { nome: { [Op.like]: `%${filtro}%` } },
+              { email: { [Op.like]: `%${filtro}%` } },
+              { celular: { [Op.like]: `%${filtro}%` } },
+              { cpf: { [Op.like]: `%${filtro}%` } },
+          ];
+      }
+
+        const funcionario = await Funcionario.findAll({
+            attributes: { exclude: ["senha"] }, 
+            where: whereClause,
+        });
+
+        res.status(200).json(funcionario);
     } catch (err) {
-      res.status(500).json(err.message);
+        console.error(err);
+        res.status(500).json({ message: 'Erro ao buscar funcionários', error: err.message });
     }
-  }
+  }  
 
   static async funDel(req, res) {
     const token = getToken(req);
@@ -275,6 +293,8 @@ module.exports = class FuncionarioController {
     const Ope = await Operador.findOne({
       where: { EmpresaId: empresa.id, cpf: cpfResponsavel },
     });
+  
+    console.log(empresa.id);
 
     if (!Ope) {
       return res
@@ -289,6 +309,8 @@ module.exports = class FuncionarioController {
     }
 
     const cpfPai = req.params.cpf;
+
+    console.log('cpf pai: ' + cpfPai);
 
     const funcionario = await Funcionario.findOne({
       where: { cpf: cpfPai, EmpresaId: empresa.id },
@@ -327,11 +349,14 @@ module.exports = class FuncionarioController {
       }
     }
 
-    if (!validaCPF(cpf)) {
-      return res.status(422).json({ message: "CPF inválido" });
-    } else {
-      cpf = cpf.replace(/[^\d]+/g, "");
-    }
+    console.log('inicinado aqui valida cpf')
+
+    // if (!validaCPF(cpf)) {
+    //   return res.status(422).json({ message: "CPF inválido" });
+    // } else {
+    //   console.log('inicinado aqui')
+    //   cpf = cpf.replace(/[^\d]+/g, "");
+    // }
 
     funcionario.cpf = cpf;
 
@@ -356,24 +381,23 @@ module.exports = class FuncionarioController {
 
     funcionario.email = email;
 
-    if (celular && celular !== funcionario.celular) {
-      const celularExiste = await Funcionario.findOne({
-        where: { celular: celular },
-      });
-      if (celularExiste) {
-        celularExiste.senha = undefined;
-        return res
-          .status(422)
-          .json({
-            message: "Este celular já está sendo utilizado",
-            emailExiste,
-          });
-      }
-    }
+    // if (celular && celular !== funcionario.celular) {
+    //   const celularExiste = await Funcionario.findOne({
+    //     where: { celular: celular },
+    //   });
+    //   if (celularExiste) {
+    //     celularExiste.senha = undefined;
+    //     return res.status(422)
+    //       .json({
+    //         message: "Este celular já está sendo utilizado",
+    //         emailExiste,
+    //       });
+    //   }
+    // }
 
-    if (!validaCelular(celular)) {
-      return res.status(422).json({ message: "Celular inválido" });
-    }
+    // if (!validaCelular(celular)) {
+    //   return res.status(422).json({ message: "Celular inválido" });
+    // }
 
     funcionario.celular = celular;
 
@@ -421,7 +445,7 @@ module.exports = class FuncionarioController {
 
         const marc = await Marcacao.create({
           nsr: ultimaMarc.nsr,
-          inpi_codigo: "const inpi",
+          inpi_codigo: "BR 51 2025 001324-8",
           cpfResponsavel: cpfResponsavel,
           FuncionarioId: funcionario.id,
           RepPId: funcRep[key].RepPId,
@@ -433,9 +457,9 @@ module.exports = class FuncionarioController {
         });
       }
 
-      res.status(200).json({ message: "Funcionario Alterado!" });
+      return res.status(200).json({ message: "Funcionario Alterado!" });
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
     }
   }
 };

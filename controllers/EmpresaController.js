@@ -192,9 +192,9 @@ module.exports = class EmpresaController {
     const token = getToken(req);
     const emp = await getUserByToken(token);
 
-    if (emp.id != 1) {
-      return res.status(401).json({ message: "Acesso Negado!" });
-    }
+    // if (emp.id != 1) {
+    //   return res.status(401).json({ message: "Acesso Negado!" });
+    // }
 
     try {
       const cnpj = req.params.cnpj;

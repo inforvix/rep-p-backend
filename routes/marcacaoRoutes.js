@@ -49,7 +49,7 @@ router.post('/registraToken', verifyToken, MarcacaoController.registraToken)
  *       '401':
  *         description: Acesso negado!    
  */
-router.post('/registracpf/:cpf/idrep/:id', verifyToken, MarcacaoController.registraCPF)
+router.post('/registracpf/:cpf', verifyToken, MarcacaoController.registraCPF)
 /**
  * @openapi
  * /marcacao/registrapis/{pis}/idrep/{id}:

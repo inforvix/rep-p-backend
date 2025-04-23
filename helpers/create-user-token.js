@@ -11,6 +11,7 @@ const createUserToken = async(emp,req,res)=> {
     token: token,
     userid:emp.id,
     paramsenhafunc: emp.solicitasenhafunc,
+    cnpj:emp.cnpj,
   })
 
 }
