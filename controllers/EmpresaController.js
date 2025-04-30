@@ -20,7 +20,7 @@ module.exports = class EmpresaController {
 
     let { cnpj } = req.body;
     
-    const { contrato, login, senha, razao, fantasia, email } = req.body;
+    const { contrato, login, senha, razao, fantasia, email, solicitaFotoRegistrarMarcacao } = req.body;
     if (!cnpj) {
       res.status(422).json({ message: "CNPJ é obrigatório" });
       return;
@@ -104,6 +104,8 @@ module.exports = class EmpresaController {
         fantasia: fantasia,
         email: email,
         ativo: true,
+        solicita_foto_registrar_marcacao: solicitaFotoRegistrarMarcacao,
+        
       });
       // newEmp.save();
       //res.status(201).json({message:'Empresa criada',newEmp})
@@ -240,7 +242,7 @@ module.exports = class EmpresaController {
     }
 
     let { cnpj } = req.body;
-    const { contrato, login, senha, razao, fantasia, email, ativo } = req.body;
+    const { contrato, login, senha, razao, fantasia, email, ativo, solicitaFotoRegistrarMarcacao } = req.body;
 
     if (!cnpj) {
       res.status(422).json({ message: "CNPJ é obrigatório" });
@@ -319,6 +321,7 @@ module.exports = class EmpresaController {
     empresa.login = login;
     empresa.razao = razao;
     empresa.fantasia = fantasia;
+    empresa.solicita_foto_registrar_marcacao = solicitaFotoRegistrarMarcacao;
 
     if (ativo != undefined) {
       empresa.ativo = ativo;

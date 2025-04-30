@@ -36,7 +36,11 @@ const Empresa = db.define('Empresa', {
   },
   ativo: {
     type: DataTypes.BOOLEAN,
-  }
+  },
+  solicita_foto_registrar_marcacao: {
+    type: DataTypes.BOOLEAN,
+    required: false,
+  },
 }, {
   timestamps: false,
   createdAt: false,

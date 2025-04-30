@@ -1,5 +1,6 @@
 const sequelize = require('sequelize')
 const { Op } = require('sequelize')
+const { DateTime } = require('luxon');
 
 const FunRep = require('../models/FuncionarioRep')
 const Rep = require('../models/Rep-p')
@@ -594,10 +595,10 @@ module.exports = class MarcacaoController {
 
     try {
       const inicio = new Date(dataInicio);
-      inicio.setHours(0, 0, 0, 0);
+      inicio.setHours(21, 0, 0, 0);
     
       const fim = new Date(dataFim);
-      fim.setHours(23, 59, 59, 999);
+      fim.setHours(44, 59, 59, 999);
     
       const rows = await Marcacao.findAll({
         where: {
