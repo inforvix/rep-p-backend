@@ -32,6 +32,8 @@ module.exports = class MarcacaoController {
     });
 
 
+
+
     // Extrai o número serial do corpo
     var numeroSerial = await extrairParametroFaceId(body, "device_id");
     const idFuncionario = await extrairParametroFaceId(body, "user_id");

@@ -144,11 +144,10 @@ app.use("/marcacao", MarcacaoRoutes);
 const OperadorRoutes = require("./routes/operadorRoutes");
 app.use("/operador", OperadorRoutes);
 
-// Listen
 conn
   .sync()
   .then(() => {
-    app.listen(port, console.log('Sistema rodando em http://localhost:5000/'));  
+    app.listen(port, console.log('Sistema rodando em http://localhost:50001/'));  
     Empresa.findOne({ where: { cnpj: "73172362000133" } }).then((value) => {
       if (!value) {
         bcrypt.genSalt(12).then((value) => {
