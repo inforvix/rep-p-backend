@@ -350,100 +350,86 @@ module.exports = class MarcacaoController {
   }
 
   
-  static async registraFaceIdOffLine(req, res) {
-    const { idFuncionario, timestemp, numeroSerialAparelho } = req.body;
+static async registraFaceIdOffLine(req, res) {
+  const { access_logs } = req.body;
+  const online = 1; // Marcação offline
+  const tipoRegistro = 7;
+  const tipoOperacao = "01";
 
-    const cpf = idFuncionario.toString().slice(-11);
-    const empresaId = idFuncionario.toString().slice(0,-11);
-    const numeroSerial = numeroSerialAparelho.toString()
-
-
-    const online = 1 //rep-p Informar "0" para marcação on-line ou "1" para marcaçãooff-line.
-    const tipoRegistro = 7
-    const tipoOperacao = "01"
-
-    if (!cpf) {
-      return res.status(422).json({ message: 'O CPF é obrigatório' })
+  try {
+    if (!Array.isArray(access_logs) || access_logs.length === 0) {
+      return res.status(400).json({ message: 'Nenhum log enviado' });
     }
 
-    const funcionario = await Funcionario.findOne({ where: { cpf: cpf, EmpresaId: empresaId } })
-    const reps = await Rep.findAll({ where: { numero_serial: numeroSerial, EmpresaId:  empresaId} });
-    
-    if (!reps.length) {
-      return res.status(404).json({ error: 'REP não encontrado' }); 
-    } 
+    for (const log of access_logs) {
+      const idFuncionario = log.user_id.toString();
+      const timestemp = log.time;
+      const numeroSerial = log.device_id.toString();
 
-    const repid = reps[0].id
 
-    if (!repid) {
-      return res.status(422).json({ message: 'O ID do Rep-P é obrigatório' })
-    }
+      const cpf = idFuncionario.slice(-11);
+      const empresaId = idFuncionario.slice(0, -11);
 
-    try {
-     
-      if (!funcionario) {
-        return res.status(422).json({ message: 'Funcionario não encontrado' })
-      }
+      if (!cpf) continue; // Pula se CPF estiver vazio
 
-      const funRep = await FunRep.findOne({ where: { FuncionarioId: funcionario.id, RepPId: repid } })
-      if (!funRep) {
-        return res.status(422).json({ message: 'Funcionario não cadastrado nesse Rep-p' })
-      }
-
-      const rep = await Rep.findByPk(repid)
-      if (!rep) {
-        return res.status(422).json({ message: 'Rep-P não encontrado' })
-      }
-
-      if (!rep.ativo) {
-        return res.status(422).json({ message: 'Rep-P não está ativo' })
-      }
-
-      if (rep.EmpresaId != empresa) {
-        return res.status(401).json({ message: 'Acesso Negado! Rep não pertence a sua empesa' })
-      }
-
-      let ultimaMarc = await Marcacao.findOne({
-        attributes: [[sequelize.fn('max', sequelize.col('nsr')), 'nsr']],
-        where: { RepPId: rep.id },
-      })
-
-      if (ultimaMarc.nsr == null) {
-        ultimaMarc.nsr = 1;
-      } else { ultimaMarc.nsr++ }
-
-      let hashAnterior
-      if (ultimaMarc.tipoRegistro == 7) {
-        hashAnterior = ultimaMarc.crc16_sha256
-      } else { hashAnterior = '' }
+      const funcionario = await Funcionario.findOne({ where: { cpf, EmpresaId: empresaId } });
+      const reps = await Rep.findAll({ where: { numero_serial: numeroSerial, EmpresaId: empresaId } });
 
       const dateFull = new Date(timestemp * 1000);
-
       const dia = dateFull.getDate().toString().padStart(2, '0');
       const mes = (dateFull.getMonth() + 1).toString().padStart(2, '0');
       const ano = dateFull.getFullYear().toString();
       const date = `${mes}/${dia}/${ano}`;
+      const hora = dateFull.toLocaleTimeString('pt-BR', { hour12: false });
+      const marcacao = await Marcacao.findAll({ where: { hora: hora, data: date, online: 1, cpf: cpf } })
 
-      const hora = dateFull.toLocaleString().split(' ')[1];
+      if (marcacao.length > 0) {
+        continue;
+      }
 
-      //online mas offline 
-      let codigoHash = ultimaMarc.nsr + tipoRegistro + date + hora + cpf + date + hora + tipoOperacao + online + hashAnterior
-      codigoHash = hash_sha256(codigoHash)
-      const marc = await Marcacao.create({
-        data: date, hora: hora, nsr: ultimaMarc.nsr, cpf: cpf, cnpj: rep.cnpj_cpf_emp,
-        local: rep.local, inpi_codigo: 'BR 51 2025 001324-8', RepPId: rep.id, FuncionarioId: funcionario.id,
-        tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash
-      })
+      if (!reps.length || !funcionario) continue;
 
-      marc.save();
-      res.status(200).json('Marcação inserida')
-      sendMail(funcionario, marc, date);
-      if (funcionario.celular != undefined) { sendZap(funcionario, marc, date); }
-    } catch (err) {
-      res.status(500).json(err.message)
+      const rep = reps[0];
+
+      const funRep = await FunRep.findOne({ where: { FuncionarioId: funcionario.id, RepPId: rep.id } });
+      if (!funRep || !rep.ativo || rep.EmpresaId !== empresaId) continue;
+
+      let ultimaMarc = await Marcacao.findOne({
+        attributes: [[sequelize.fn('max', sequelize.col('nsr')), 'nsr']],
+        where: { RepPId: rep.id },
+      });
+
+      let nsr = ultimaMarc?.nsr ? parseInt(ultimaMarc.nsr) + 1 : 1;
+      let hashAnterior = ultimaMarc?.tipoRegistro === 7 ? ultimaMarc.crc16_sha256 : '';
+
+      let codigoHash = nsr + tipoRegistro + date + hora + cpf + date + hora + tipoOperacao + online + hashAnterior;
+      codigoHash = hash_sha256(codigoHash);
+
+      await Marcacao.create({
+        data: date,
+        hora,
+        nsr,
+        cpf,
+        cnpj: rep.cnpj_cpf_emp,
+        local: rep.local,
+        inpi_codigo: 'BR 51 2025 001324-8',
+        RepPId: rep.id,
+        FuncionarioId: funcionario.id,
+        tipoRegistro,
+        tipoOperacao,
+        online,
+        crc16_sha256: codigoHash
+      });
+
+      sendMail(funcionario, { data: date, hora }); // ou envie o objeto `marc` se quiser mais detalhes
     }
 
+    res.status(200).json('Marcações processadas com sucesso');
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+}
+
 
   static async registraPIS(req, res) {
     const pis = req.params.pis
