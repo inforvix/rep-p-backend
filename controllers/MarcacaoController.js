@@ -421,7 +421,8 @@ static async registraFaceIdOffLine(req, res) {
         crc16_sha256: codigoHash
       });
 
-      sendMail(funcionario, { data: date, hora }); // ou envie o objeto `marc` se quiser mais detalhes
+      marc.save();
+      sendMail(funcionario, marc, date);
     }
 
     res.status(200).json('Marcações processadas com sucesso');
