@@ -349,67 +349,76 @@ module.exports = class MarcacaoController {
 
   }
 
-  
-static async registraFaceIdOffLine(req, res) {
+  static async registraFaceIdOffLine(req, res) {
   const { access_logs } = req.body;
-  const online = 1; // Marcação offline
-  const tipoRegistro = 7;
-  const tipoOperacao = "01";
 
-  try {
-    if (!Array.isArray(access_logs) || access_logs.length === 0) {
-      return res.status(400).json({ message: 'Nenhum log enviado' });
-    }
+  if (!Array.isArray(access_logs)) {
+    return res.status(400).json({ message: 'Formato inválido. Esperado access_logs como array.' });
+  }
 
-    for (const log of access_logs) {
+  for (const log of access_logs) {
+    try {
       const idFuncionario = log.user_id.toString();
       const timestemp = log.time;
-      const numeroSerial = log.device_id.toString();
-
+      const numeroSerialAparelho = log.device_id.toString();
 
       const cpf = idFuncionario.slice(-11);
       const empresaId = idFuncionario.slice(0, -11);
+      const online = 1;
+      const tipoRegistro = 7;
+      const tipoOperacao = "01";
 
-      if (!cpf) continue; // Pula se CPF estiver vazio
+      if (!cpf) continue;
 
       const funcionario = await Funcionario.findOne({ where: { cpf, EmpresaId: empresaId } });
-      const reps = await Rep.findAll({ where: { numero_serial: numeroSerial, EmpresaId: empresaId } });
+      if (!funcionario) continue;
 
-      const dateFull = new Date(timestemp * 1000);
-      const dia = dateFull.getDate().toString().padStart(2, '0');
-      const mes = (dateFull.getMonth() + 1).toString().padStart(2, '0');
-      const ano = dateFull.getFullYear().toString();
-      const date = `${mes}/${dia}/${ano}`;
-      const hora = dateFull.toLocaleTimeString('pt-BR', { hour12: false });
-      const marcacao = await Marcacao.findAll({ where: { hora: hora, data: date, online: 1, cpf: cpf } })
+      const reps = await Rep.findAll({ where: { numero_serial: numeroSerialAparelho, EmpresaId: empresaId } });
+      if (!reps.length) continue;
 
-      if (marcacao.length > 0) {
-        continue;
-      }
+        const dateFull = new Date(timestemp * 1000);
+        const dia = dateFull.getDate().toString().padStart(2, '0');
+        const mes = (dateFull.getMonth() + 1).toString().padStart(2, '0');
+        const ano = dateFull.getFullYear().toString();
+        const date = `${mes}/${dia}/${ano}`;
+        const hora = dateFull.toLocaleTimeString('pt-BR', { hour12: false });
+        const marcacao = await Marcacao.findAll({ where: { hora: hora, data: date, online: 1, cpf: cpf } })
 
-      if (!reps.length || !funcionario) continue;
+        if (marcacao.length > 0) {
+          continue;
+        }
 
       const rep = reps[0];
+      if (!rep.ativo || rep.EmpresaId != empresaId) continue;
 
       const funRep = await FunRep.findOne({ where: { FuncionarioId: funcionario.id, RepPId: rep.id } });
-      if (!funRep || !rep.ativo || rep.EmpresaId !== empresaId) continue;
+      if (!funRep) continue;
 
       let ultimaMarc = await Marcacao.findOne({
         attributes: [[sequelize.fn('max', sequelize.col('nsr')), 'nsr']],
         where: { RepPId: rep.id },
+        raw: true,
       });
 
       let nsr = ultimaMarc?.nsr ? parseInt(ultimaMarc.nsr) + 1 : 1;
-      let hashAnterior = ultimaMarc?.tipoRegistro === 7 ? ultimaMarc.crc16_sha256 : '';
+
+      let hashAnterior = '';
+      const ultimaMarcFull = await Marcacao.findOne({
+        where: { RepPId: rep.id },
+        order: [['nsr', 'DESC']],
+      });
+      if (ultimaMarcFull?.tipoRegistro == 7) {
+        hashAnterior = ultimaMarcFull.crc16_sha256;
+      }
 
       let codigoHash = nsr + tipoRegistro + date + hora + cpf + date + hora + tipoOperacao + online + hashAnterior;
       codigoHash = hash_sha256(codigoHash);
 
       await Marcacao.create({
         data: date,
-        hora,
-        nsr,
-        cpf,
+        hora: hora,
+        nsr: nsr,
+        cpf: cpf,
         cnpj: rep.cnpj_cpf_emp,
         local: rep.local,
         inpi_codigo: 'BR 51 2025 001324-8',
@@ -418,19 +427,17 @@ static async registraFaceIdOffLine(req, res) {
         tipoRegistro,
         tipoOperacao,
         online,
-        crc16_sha256: codigoHash
+        crc16_sha256: codigoHash,
       });
 
-      marc.save();
-      sendMail(funcionario, marc, date);
+    } catch (err) {
+      console.error(`Erro ao processar log ID ${log.id}:`, err.message);
+      continue; // Continua processando os demais logs
     }
-
-    res.status(200).json('Marcações processadas com sucesso');
-  } catch (err) {
-    res.status(500).json({ error: err.message });
   }
-}
 
+  return res.status(200).json({ message: 'Processamento concluído' });
+}
 
   static async registraPIS(req, res) {
     const pis = req.params.pis
