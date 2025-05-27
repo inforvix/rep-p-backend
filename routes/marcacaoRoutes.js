@@ -107,13 +107,15 @@ router.post('/registrapis/:pis/idrep/:id', verifyToken , MarcacaoController.regi
  *       '401':
  *         description: Acesso negado!  
  */
- router.get('/recolher/:idrep/:nsr', verifyToken, MarcacaoController.recolheMarc)
+router.get('/recolher/:idrep/:nsr', verifyToken, MarcacaoController.recolheMarc)
 
+router.post('/faceid/offline', verifyToken, MarcacaoController.registraFaceIdOffLine)
+ 
  router.get('/dia/:cpf',verifyToken,MarcacaoController.marcacaoFunc)
-
+ 
  router.get('/:dataInicio/:dataFim/:cpf',verifyToken,MarcacaoController.buscarMarcacaoPorPeriodo)
-
+ 
  router.post('/faceid/new_user_identified.fcgi', MarcacaoController.marcacaoFaceID)
  router.post('/faceid/device_is_alive.fcgi', MarcacaoController.reconectarAoServidor)
  router.get('/faceid/device_is_alive.fcgi', MarcacaoController.reconectarAoServidor)
-module.exports = router
+ module.exports = router
