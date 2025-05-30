@@ -162,14 +162,17 @@ module.exports = class RepController{
         if (!empresa){
           return res.status(422).json({message:'Empresa não encontrada'}) 
         }
+
         let {cnpj} = req.body
-        const {id,local,nome_rep,razao,ativo,numero_serial,empresaid} = req.body
+
+        const {id,local,nome_rep,razao,ativo,numero_serial,empresaid,caminho_ip} = req.body
         
         if (empresa.id != empresaid){
           return res.status(401).json({message:'Acesso Negado! Rep não pertence a sua empesa'})
         }
 
         let rep = new Rep;
+
         try{
           rep = await Rep.findByPk(id)
         }catch(err){
@@ -177,7 +180,7 @@ module.exports = class RepController{
         }
 
         if (!rep){
-          return res.status(422).json({message:'Rep-p não encontrador',codigoRep:id})
+          return res.status(422).json({message:'Rep-p não encontrado',codigoRep:id})
         }
 
         if (nome_rep)
@@ -200,6 +203,9 @@ module.exports = class RepController{
         
         if (numero_serial)
           {rep.numero_serial = numero_serial}
+
+        if (caminho_ip)
+          {rep.caminho_ip = caminho_ip}
         
         if(ativo != undefined)
         {rep.ativo = ativo} 

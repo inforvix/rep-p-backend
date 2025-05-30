@@ -17,6 +17,8 @@ const RepP = db.define('RepP',{
     ativo: {type: DataTypes.BOOLEAN,},
     numero_serial: {type: DataTypes.STRING,
       required: false,},
+    caminho_ip: {type: DataTypes.STRING,
+      required: false,},
   },{
     timestamps: false,
     createdAt: false,

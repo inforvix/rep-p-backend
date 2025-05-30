@@ -349,7 +349,7 @@ module.exports = class MarcacaoController {
 
   }
 
-  static async registraFaceIdOffLine(req, res) {
+   static async registraFaceIdOffLine(req, res) {
   const { access_logs } = req.body;
 
   if (!Array.isArray(access_logs)) {
@@ -376,17 +376,18 @@ module.exports = class MarcacaoController {
       const reps = await Rep.findAll({ where: { numero_serial: numeroSerialAparelho, EmpresaId: empresaId } });
       if (!reps.length) continue;
 
-        const dateFull = new Date(timestemp * 1000);
-        const dia = dateFull.getDate().toString().padStart(2, '0');
-        const mes = (dateFull.getMonth() + 1).toString().padStart(2, '0');
-        const ano = dateFull.getFullYear().toString();
-        const date = `${mes}/${dia}/${ano}`;
-        const hora = dateFull.toLocaleTimeString('pt-BR', { hour12: false });
-        const marcacao = await Marcacao.findAll({ where: { hora: hora, data: date, online: 1, cpf: cpf } })
+      const dateFull = new Date((timestemp + 3 * 3600) * 1000); // Adiciona 3h em segundos
+      const dia = dateFull.getDate().toString().padStart(2, '0');
+      const mes = (dateFull.getMonth() + 1).toString().padStart(2, '0');
+      const ano = dateFull.getFullYear().toString();
+      const date = `${mes}/${dia}/${ano}`;
+      const hora = dateFull.toLocaleTimeString('pt-BR', { hour12: false }); // Formato 24h, sem AM/PM
+      
+      const marcacao = await Marcacao.findAll({ where: { hora: hora, data: date, online: 1, cpf: cpf } })
 
-        if (marcacao.length > 0) {
-          continue;
-        }
+      if (marcacao.length > 0) {
+        continue;
+      }
 
       const rep = reps[0];
       if (!rep.ativo || rep.EmpresaId != empresaId) continue;
@@ -432,7 +433,7 @@ module.exports = class MarcacaoController {
 
     } catch (err) {
       console.error(`Erro ao processar log ID ${log.id}:`, err.message);
-      continue; // Continua processando os demais logs
+      continue;
     }
   }
 
