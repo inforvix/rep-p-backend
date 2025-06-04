@@ -69,6 +69,14 @@ const Marcacao = db.define('Marcacao', {
     type: DataTypes.STRING,//rep-p Códigohash.
     required: true,
   },
+    latitude: {
+    type: DataTypes.STRING,//rep-p Códigohash.
+    required: true,
+  },
+    longitude: {
+    type: DataTypes.STRING,//rep-p Códigohash.
+    required: true,
+  },
 }, {
   updatedAt: false,
   useUTC: false,

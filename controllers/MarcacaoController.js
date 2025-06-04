@@ -31,13 +31,10 @@ module.exports = class MarcacaoController {
       body += chunk.toString();
     });
 
-
     // Extrai o número serial do corpo
     var numeroSerial = await extrairParametroFaceId(body, "device_id");
     const idFuncionario = await extrairParametroFaceId(body, "user_id");
     var nomeFuncionario = await extrairParametroFaceId(body, "user_name");
-
-    console.log(numeroSerial);
 
     var cpf = idFuncionario.slice(-11);
     var idEmpresa = idFuncionario.slice(0,-11);
@@ -173,8 +170,11 @@ module.exports = class MarcacaoController {
     const cpf = req.user.fun_cpf
     const repid = req.user.fun_rep_padrao
     const empresaId = req.user.fun_empresa
-    //const longitude = req.params.longitude
-    //console.log('a latitude informado foi: ' + longitude)
+
+    const {latitude, longitude} = req.body
+    
+    console.log('a latitude informado foi: ' + latitude)
+    console.log('a latitude informado foi: ' + longitude)
 
     const token = getToken(req)
     const empresa = await getUserByTokenFuncionario(token)
@@ -239,19 +239,17 @@ module.exports = class MarcacaoController {
 
       const hora = dateFull.toLocaleString().split(' ')[1];
 
-      //online mas offline 
       let codigoHash = ultimaMarc.nsr + tipoRegistro + date + hora + cpf + date + hora + tipoOperacao + online + hashAnterior
       codigoHash = hash_sha256(codigoHash)
       const marc = await Marcacao.create({
         data: date, hora: hora, nsr: ultimaMarc.nsr, cpf: cpf, cnpj: rep.cnpj_cpf_emp,
         local: rep.local, inpi_codigo: 'BR 51 2025 001324-8', RepPId: rep.id, FuncionarioId: funcionario.id,
-        tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash 
+        tipoRegistro: tipoRegistro, tipoOperacao: tipoOperacao, online: online, crc16_sha256: codigoHash, latitude: latitude, longitude: longitude 
       })
 
       
       marc.save();
       res.status(200).json('Marcação inserida')
-      console.log('Irei chamar a funcao de envio de email')
       sendMail(funcionario, marc, date);
       if (funcionario.celular != undefined) { sendZap(funcionario, marc, date); }
     } catch (err) {
