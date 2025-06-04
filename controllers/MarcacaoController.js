@@ -259,8 +259,6 @@ module.exports = class MarcacaoController {
   }
 
 
-
-
   static async registraCPF(req, res) {
     const cpf = req.params.cpf
     
@@ -642,7 +640,7 @@ module.exports = class MarcacaoController {
         , order: [
           ['id', 'ASC'],
         ],
-        attributes: ["nsr", "cpf", "data", "hora", "cnpj", "inpi_codigo"]
+        attributes: ["nsr", "cpf", "data", "hora", "cnpj", "inpi_codigo", "longitude", "latitude"]
       })
 
       const totPage = Math.ceil(count / limit)
