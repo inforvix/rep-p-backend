@@ -114,6 +114,8 @@ router.post('/faceid/offline', verifyToken, MarcacaoController.registraFaceIdOff
  router.get('/dia/:cpf',verifyToken,MarcacaoController.marcacaoFunc)
  
  router.get('/:dataInicio/:dataFim/:cpf',verifyToken,MarcacaoController.buscarMarcacaoPorPeriodo)
+
+router.patch('/observacao',verifyToken,MarcacaoController.informarObservacaoNaMarcacao)
  
  router.post('/faceid/new_user_identified.fcgi', MarcacaoController.marcacaoFaceID)
  router.post('/faceid/device_is_alive.fcgi', MarcacaoController.reconectarAoServidor)
