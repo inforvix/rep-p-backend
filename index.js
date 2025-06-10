@@ -85,6 +85,9 @@ app.use("/marcacao", MarcacaoRoutes);
 const OperadorRoutes = require("./routes/operadorRoutes");
 app.use("/operador", OperadorRoutes);
 
+const MarcacaoSolicitadaRoutes = require("./routes/MarcacoesSolicitadasRoutes");
+app.use("/marcacao-solicitada",MarcacaoSolicitadaRoutes);    
+
 conn
   .sync()
   .then(() => {
