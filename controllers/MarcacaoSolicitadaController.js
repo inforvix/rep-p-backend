@@ -2,12 +2,35 @@ const sequelize = require("sequelize");
 const { Op } = require("sequelize");
 
 const getToken = require("../helpers/get-token");
+const getUserByToken = require("../helpers/get-user-by-token");
 
 const Funcionario = require("../models/Funcionario");
 const Empresa = require("../models/Empresa");
 const MarcacaoSolicitada = require("../models/Marcacao-Solicitada");
 
 module.exports = class MarcacaoController {
+
+
+  static async buscarMarcacoesSolicitadas(req, res) {
+        const token = getToken(req);
+        const empresa = await getUserByToken(token);
+   
+
+    try {
+
+      const marcacoes = await MarcacaoSolicitada.findAll({
+        where: {
+          cnpj: empresa.cnpj,
+        },
+        order: [["data", "DESC"]],
+      });
+
+      res.status(200).json(marcacoes);
+    } catch (err) {
+      res.status(500).json(err.message);
+    }
+  }
+
   static async solicitarMarcacao(req, res) {
     const cpf = req.user.fun_cpf;
     const empresa = await Empresa.findOne({ where: { id:  req.user.fun_empresa } });
@@ -32,7 +55,7 @@ module.exports = class MarcacaoController {
         return res.status(422).json({ message: "Funcionario não encontrado" });
       }
 
-      const marc = await MarcacaoSolicitada.create({
+      await MarcacaoSolicitada.create({
         data: data,
         hora: hora,
         cpf: funcionario.cpf,

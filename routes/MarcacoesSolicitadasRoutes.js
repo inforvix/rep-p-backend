@@ -4,5 +4,6 @@ const MarcacaoSolicitadaController = require('../controllers/MarcacaoSolicitadaC
 const verifyToken = require('../helpers/verify-token')
 
 router.post('/solicitar', verifyToken, MarcacaoSolicitadaController.solicitarMarcacao)
+router.get('/buscar', verifyToken, MarcacaoSolicitadaController.buscarMarcacoesSolicitadas)
 
 module.exports = router
