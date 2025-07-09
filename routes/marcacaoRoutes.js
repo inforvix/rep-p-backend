@@ -111,11 +111,15 @@ router.get('/recolher/:idrep/:nsr', verifyToken, MarcacaoController.recolheMarc)
 
 router.post('/faceid/offline', verifyToken, MarcacaoController.registraFaceIdOffLine)
  
- router.get('/dia/:cpf',verifyToken,MarcacaoController.marcacaoFunc)
+router.get('/dia/:cpf',verifyToken,MarcacaoController.marcacaoFunc)
  
- router.get('/:dataInicio/:dataFim/:cpf',verifyToken,MarcacaoController.buscarMarcacaoPorPeriodo)
+router.get('/observacao/:dataInicio/:dataFim', verifyToken, MarcacaoController.buscarObservacaoMarcacao)
 
 router.patch('/observacao',verifyToken,MarcacaoController.informarObservacaoNaMarcacao)
+ 
+router.get('/:dataInicio/:dataFim/:cpf',verifyToken,MarcacaoController.buscarMarcacaoPorPeriodo)
+
+
  
  router.post('/faceid/new_user_identified.fcgi', MarcacaoController.marcacaoFaceID)
  router.post('/faceid/device_is_alive.fcgi', MarcacaoController.reconectarAoServidor)

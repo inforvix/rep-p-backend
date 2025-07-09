@@ -437,11 +437,9 @@ module.exports = class MarcacaoController {
     const { access_logs } = req.body;
 
     if (!Array.isArray(access_logs)) {
-      return res
-        .status(400)
-        .json({
-          message: "Formato inválido. Esperado access_logs como array.",
-        });
+      return res.status(400).json({
+        message: "Formato inválido. Esperado access_logs como array.",
+      });
     }
 
     for (const log of access_logs) {
@@ -904,6 +902,40 @@ module.exports = class MarcacaoController {
       );
 
       res.status(200).json("Observação informada com sucesso");
+    } catch (err) {
+      res.status(500).json(err.message);
+    }
+  }
+
+  static async buscarObservacaoMarcacao(req, res) {
+
+    const token = getToken(req);
+    const dataInicio = req.params.dataInicio;
+    const dataFim = req.params.dataFim;
+    const empresa = await getUserByToken(token);
+
+    try {
+      const inicio = new Date(dataInicio);
+      inicio.setHours(21, 0, 0, 0);
+
+      const fim = new Date(dataFim);
+      fim.setHours(44, 59, 59, 999);
+
+      const rows = await Marcacao.findAll({
+        where: {
+        cnpj: empresa.cnpj,
+        observacao: {
+          [Op.ne]: null
+        },
+          data: {
+            [Op.gte]: inicio,
+            [Op.lte]: fim,
+          },
+        },
+        attributes: ["nsr", "cpf", "observacao"],
+      });
+
+      res.status(200).json({ marcacoes: rows });
     } catch (err) {
       res.status(500).json(err.message);
     }
