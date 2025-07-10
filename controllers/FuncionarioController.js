@@ -125,7 +125,7 @@ module.exports = class FuncionarioController {
       emailExiste.senha = undefined;
       res
         .status(422)
-        .json({ message: "Este e-mail já está sendo utilizado", emailExiste });
+        .json({ message: "Este e-mail já está sendo utilizado no usuario: " + emailExiste.nome, emailExiste });
       return;
     }
 
@@ -310,8 +310,6 @@ module.exports = class FuncionarioController {
 
     const cpfPai = req.params.cpf;
 
-    console.log('cpf pai: ' + cpfPai);
-
     const funcionario = await Funcionario.findOne({
       where: { cpf: cpfPai, EmpresaId: empresa.id },
     });
@@ -349,15 +347,6 @@ module.exports = class FuncionarioController {
       }
     }
 
-    console.log('inicinado aqui valida cpf')
-
-    // if (!validaCPF(cpf)) {
-    //   return res.status(422).json({ message: "CPF inválido" });
-    // } else {
-    //   console.log('inicinado aqui')
-    //   cpf = cpf.replace(/[^\d]+/g, "");
-    // }
-
     funcionario.cpf = cpf;
 
     if (email && email !== funcionario.email) {
@@ -369,7 +358,7 @@ module.exports = class FuncionarioController {
         return res
           .status(422)
           .json({
-            message: "Este e-mail já está sendo utilizado",
+            message: "Este e-mail já está sendo utilizado no usuario: " + emailExiste.nome,
             emailExiste,
           });
       }
