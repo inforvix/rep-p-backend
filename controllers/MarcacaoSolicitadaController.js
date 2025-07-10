@@ -9,11 +9,14 @@ const Empresa = require("../models/Empresa");
 const MarcacaoSolicitada = require("../models/Marcacao-Solicitada");
 
 module.exports = class MarcacaoController {
-  static async buscarMarcacoesSolicitadas(req, res) {
-    const token = getToken(req);
-    const empresa = await getUserByToken(token);
 
+
+  static async buscarMarcacoesSolicitadas(req, res) {
+        const token = getToken(req);
+        const empresa = await getUserByToken(token);
+  
     try {
+
       const marcacoes = await MarcacaoSolicitada.findAll({
         where: {
           cnpj: empresa.cnpj,
@@ -29,9 +32,7 @@ module.exports = class MarcacaoController {
 
   static async solicitarMarcacao(req, res) {
     const cpf = req.user.fun_cpf;
-    const empresa = await Empresa.findOne({
-      where: { id: req.user.fun_empresa },
-    });
+    const empresa = await Empresa.findOne({ where: { id:  req.user.fun_empresa } });
 
     const { data, hora, observacao } = req.body;
 
@@ -63,6 +64,8 @@ module.exports = class MarcacaoController {
       });
 
       res.status(200).json("Marcação Solicitada com Sucesso!");
+     
+     
     } catch (err) {
       res.status(500).json(err.message);
     }
